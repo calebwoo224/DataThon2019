@@ -20,6 +20,9 @@ def process_data(data_directory):
 
 interest_topics, training_set, validation = process_data(data_directory)
 
+def get_topic_name(topicID):
+    return interest_topics.loc[int(topicID), 'topic_name']
+
 class TopicsTree:
     class Node:
         def __init__(self, topic_name=None, topicID=None):
@@ -65,22 +68,31 @@ class TopicsTree:
                 raise KeyError()
         return current.interest_map
     def get_interested_users(self,topic):
-        return np.fromiter(self.get_interest(topic).values(), dtype=int)
+        return np.fromiter(self.get_interest(topic).keys(), dtype=int)
     def make_map(self, data, feature_name):
         for userID in data.index:
             def add_users_interest(k,v):
                 try:
-                    self.get_node(interest_topics.loc[int(k), 'topic_name']).interest_map[userID] = float(v)
+                    self.get_node(get_topic_name(int(k))).interest_map[userID] = float(v)
                 except KeyError:
                     self.head.children[k] = self.Node(topicID=int(k))
             [add_users_interest(k,v) for k,v in data.loc[userID, feature_name].items()]
 
 
-tree = TopicsTree(interest_topics)
+training_tree = TopicsTree(interest_topics)
+training_tree.make_map(training_set, 'ltiFeatures')
 
-tree.make_map(training_set, 'ltiFeatures')
+validation_tree = TopicsTree(interest_topics)
+validation_tree.make_map(validation, 'ltiFeatures')
 
-tree.get_interest('/Sports/Team Sports/American Football')
+df_training_conversion_proportion = pd.DataFrame(index=interest_topics.index)
+df_training_conversion_proportion['conversion_proportion'] = [
+np.sum([training_set.loc[userID, 'inAudience'] for userID in
+training_tree.get_interested_users(get_topic_name(i))])
+for i in interest_topics.index
+]
+
+df_training_conversion_proportion
 
 # this function makes a wide-form dataframe where each column is a different topic for a userID
 def make_topic_table(df, feature_name):
