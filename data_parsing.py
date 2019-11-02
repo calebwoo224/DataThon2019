@@ -25,16 +25,53 @@ class TopicsTree:
         def __init__(self, topic_name=None, topicID=None):
             self.name = topic_name
             self.id = topicID
+            self.interest_map = {}
             self.children = {}
     def __init__(self, topics):
-        self.head = Node()
+        self.head = self.Node()
         self.head.children = {}
-    def makeChildren(topics):
+        self.makeChildren(topics)
+    def makeChildren(self,topics):
         for i in topics.index:
-            strArray = topics.loc(i, 'topic_name').split('/')
-            parent = self.head
+            strArray = topics.loc[i, 'topic_name'].split('/')
+            current = self.head
             for str in strArray:
-                parent.children.
+                if not current.children.get(str):
+                    current.children[str] = self.Node(topic_name=str)
+                current = current.children[str]
+            current.id = i
+    def get_node(self,topic):
+        strArray = topic.split('/')
+        current = self.head
+        for str in strArray:
+            current = current.children.get(str)
+            if not current:
+                raise KeyError()
+        return current
+    def get_id(self,topic):
+        strArray = topic.split('/')
+        current = self.head
+        for str in strArray:
+            current = current.children.get(str)
+            if not current:
+                raise KeyError()
+        return current.id
+    def get_interest(self,topic):
+        strArray = topic.split('/')
+        current = self.head
+        for str in strArray:
+            current = current.children.get(str)
+            if not current:
+                raise KeyError()
+        return current.interest_map
+    def make_map(self, data):
+        for userID in data.index:
+            for k,v in data.loc[userID, 'ltiFeatures']:
+                self.get_node(interest_topics.loc[int(k), 'topic_name']).interest_map[userID] = v
+
+tree = TopicsTree(interest_topics)
+
+tree.make_map(training_set)
 
 # this function makes a wide-form dataframe where each column is a different topic for a userID
 def make_topic_table(df, feature_name):
