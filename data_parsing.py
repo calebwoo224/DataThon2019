@@ -64,14 +64,23 @@ class TopicsTree:
             if not current:
                 raise KeyError()
         return current.interest_map
-    def make_map(self, data):
+    def get_interested_users(self,topic):
+        return np.fromiter(self.get_interest(topic).values(), dtype=int)
+    def make_map(self, data, feature_name):
         for userID in data.index:
-            for k,v in data.loc[userID, 'ltiFeatures']:
-                self.get_node(interest_topics.loc[int(k), 'topic_name']).interest_map[userID] = v
+            def add_users_interest(k,v):
+                try:
+                    self.get_node(interest_topics.loc[int(k), 'topic_name']).interest_map[userID] = float(v)
+                except KeyError:
+                    self.head.children[k] = self.Node(topicID=int(k))
+            [add_users_interest(k,v) for k,v in data.loc[userID, feature_name].items()]
+
 
 tree = TopicsTree(interest_topics)
 
-tree.make_map(training_set)
+tree.make_map(training_set, 'ltiFeatures')
+
+tree.get_interest('/Sports/Team Sports/American Football')
 
 # this function makes a wide-form dataframe where each column is a different topic for a userID
 def make_topic_table(df, feature_name):
