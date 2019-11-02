@@ -3,7 +3,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from ast import literal_eval
 
-data_directory = 'Duke_Datathon_10-29-19/valassis_dataset/'
+data_directory = 'dataset'
 
 def process_data(data_directory):
     interest_topics = pd.read_csv(data_directory + 'interest_topics.csv', index_col='topic_id')
