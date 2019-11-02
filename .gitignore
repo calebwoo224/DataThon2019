@@ -102,3 +102,6 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+*.csv
+Duke_Datathon_10-29-19/
